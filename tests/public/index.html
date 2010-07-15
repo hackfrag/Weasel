@@ -7,6 +7,10 @@
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script>
 		<script type="text/javascript" src="/vendor/socket.io.js"> </script>
 		<script type="text/javascript" src="/lib/weasel.js"> </script>
+		
+		<script type="text/javascript" src="socket.io.js"> </script>
+		<script type="text/javascript" src="client.weasel.js"> </script>
+		
 		<link rel="stylesheet" type="text/css" href="style.css" />
 
 
@@ -31,11 +35,21 @@
 				},
 				chat: function(params) {
 					var bubble = $('#point-' + params.sessionId + ' > div.message');
+					
 					bubble.stop().hide();
 					bubble.html(params.message);
 					bubble.fadeIn('fast', function() {
 						$(this).fadeOut(2000)
 					})
+				},
+				move : function(params) {
+					var bubble = $('#point-' + params.sessionId);
+					
+					bubble.animate({ 
+						top:  params.position.top,
+						left:  params.position.left,
+					}, 500 );
+				
 				}
 				
 			}
@@ -48,18 +62,11 @@
 			Weasel.subscribe('disconnect', function(params) {
 				$('#point-' + params.client.sessionId).hide();
 			})
-			Weasel.subscribe('chat', function(params) {
-				Example.chat(params);
-			});
+			Weasel.subscribe('chat', Example.chat);
 			
-			Weasel.subscribe('move', function(params) {
+			Weasel.subscribe('move', Example.move);
 				
-				var bubble = $('#point-' + params.sessionId);
-				bubble.animate({ 
-					top:  params.position.top,
-					left:  params.position.left,
-				}, 500 );
-			})
+				
 			
 			Weasel.ready(function() {
 				
@@ -74,9 +81,13 @@
 						newPostion = {top: e.pageY-divPos.top - 25, left: e.pageX-divPos.left - 25};
 					
 					Weasel.command("move", newPostion, function(params) {
-						var bubble = $('#point-' + Weasel.Client.sessionId);
+						
+						Example.move({
+							sessionId : Weasel.Client.sessionId,
+							position: newPostion
+						})
+												
 					
-						bubble.animate(newPostion, 500 );
 					})
 				})
 				

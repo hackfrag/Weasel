@@ -1,8 +1,8 @@
-var http = require('http'),
-	url = require('url'),
-	fs = require('fs'),
-	io = require('../vendor/socket.io'),
-	sys = require('sys');
+var http	= require('http'),
+	url		= require('url'),
+	fs		= require('fs'),
+	io		= require('../vendor/socket.io'),
+	sys		= require('sys');
 
 var send404 = function(res){
 	res.writeHead(404);
@@ -11,6 +11,7 @@ var send404 = function(res){
 }
 
 var Commands = {
+	
 	connect: function(server, client, params) {
 	
 		return new Response(server.clients, {
@@ -47,6 +48,7 @@ var Server = function(options){
 	this.clients = [];
 	
 	var self = this;
+	
 	process.EventEmitter.call(this);
 
 	this.socket = http.createServer(function(req, res){
@@ -57,7 +59,7 @@ var Server = function(options){
 				if (/\.(js|html|swf|css)$/.test(path)) {
 					
 					try {
-					
+						
 						var swf = path.substr(-4) === '.swf';
 						res.writeHead(200, {
 							'Content-Type': swf ? 'application/x-shockwave-flash' : ('text/' + (path.substr(-3) === '.js' ? 'javascript' : 'html'))
@@ -110,7 +112,7 @@ var Server = function(options){
 	
 		onClientDisconnect: function(socket){
 			
-			var client = self.clients[socket.sessionId];; 
+			var client = self.clients[socket.sessionId];
 			
 			var result = Commands['disconnect'](self, client, {});
 			var response = {
@@ -121,13 +123,11 @@ var Server = function(options){
 	
 			for (var i in result.to) {
 				if(result.to[i]) {
-					var tmp = self.listener.clientsIndex[result.to[i].sessionId];
+					var current = self.listener.clientsIndex[result.to[i].sessionId];
 					
-					if(tmp) {
-						tmp.send(JSON.stringify(response))
-					}
-					//sys.log(sys.inspect(self.listener.clientsIndex[result.to[i]]));
-					//self.listener.clientsIndex[result.to[i].sessionId].send(JSON.stringify(response));	
+					if(current) {
+						current.send(JSON.stringify(response))
+					}	
 				}
 			}			
 			self.emit("onClientDisconnect", client);
@@ -163,7 +163,9 @@ var Server = function(options){
 	
 	
 }
-
+Server.prototype.get = function(path) {
+	
+}
 
 sys.inherits(Server, process.EventEmitter); 
 
