@@ -1,0 +1,3 @@
+[submodule "src/vendor/mongoose"]
+	path = src/vendor/mongoose
+	url = git://github.com/LearnBoost/mongoose.git
