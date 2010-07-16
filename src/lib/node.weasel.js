@@ -1,9 +1,9 @@
 var http	= require('http'),
 	url		= require('url'),
 	fs		= require('fs'),
-	io		= require('../vendor/socket.io'),
+	io		= require('../vendor/socket.io-node/lib/socket.io'),
 	sys		= require('sys'),
-	fileserver = require('../vendor/paperboy');
+	fileserver = require('../vendor/paperboy/lib/paperboy');
 
 
 
