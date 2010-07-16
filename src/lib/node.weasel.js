@@ -2,13 +2,10 @@ var http	= require('http'),
 	url		= require('url'),
 	fs		= require('fs'),
 	io		= require('../vendor/socket.io'),
-	sys		= require('sys');
+	sys		= require('sys'),
+	fileserver = require('../vendor/paperboy');
 
-var send404 = function(res){
-	res.writeHead(404);
-	res.write('404');
-	res.end();
-}
+
 
 var Commands = {
 	
@@ -42,135 +39,137 @@ var Commands = {
 
 
 
-var Server = function(options){
+var Server = exports.Server = Class({
 
-	this.options = options;
-	this.clients = [];
+	include: [process.EventEmitter.prototype],
 	
-	var self = this;
-	
-	process.EventEmitter.call(this);
-
-	this.socket = http.createServer(function(req, res){
-		var path = url.parse(req.url).pathname;
+	init: function(options) {
+		this.options = options;
+		this.clients = [];
 		
-		switch (path) {
-			default:
-				if (/\.(js|html|swf|css)$/.test(path)) {
-					
-					try {
-						
-						var swf = path.substr(-4) === '.swf';
-						res.writeHead(200, {
-							'Content-Type': swf ? 'application/x-shockwave-flash' : ('text/' + (path.substr(-3) === '.js' ? 'javascript' : 'html'))
-						});
-						
-						res.write(fs.readFileSync(self.options.path  + "/public"  + path, swf ? 'binary' : 'utf8'), swf ? 'binary' : 'utf8');
-						res.end();
-					} 
-					catch (e) {
-						send404(res);
-					}
-					break;
-				}
+		var self = this;
+		
+		process.EventEmitter.call(this);
+	
+		this.socket = http.createServer(function(req, res){
+			
+			fileserver
+				.deliver(process.cwd()  + "/public" , req, res)
+				.otherwise(function(err) {
+					res.writeHead(404);
+					res.write('404');
+					res.end();
+				});
+	
+		});
+		
+
+		this.loadCommands();
+
+		
+		
+	},
+	listen: function(port) {
+		
+		var self = this;
+		
+		this.socket.listen(8080);
+		
+		this.listener = io.listen(this.socket, {
+	
+			onClientConnect: function(socket) {
+				self.onClientConnect(socket)
+			},
+			onClientDisconnect: function(socket) {
+				self.onClientDisconnect(socket);
+			},
+			onClientMessage: function(message, socket) {
+				self.onClientMessage(message, socket);
+			}
+		});
+		return this;
+	},
+	
+	onClientMessage: function(message, socket){
+	
+
+		var client 	= this.clients[socket.sessionId],
+			commandObject, result, response,
+			self	= this;
+			
+		
+		
+		commandObject = JSON.parse(message);
+		result = Commands[commandObject.command](this, client, commandObject.params);
+
+		response = {
+			'id'		: commandObject.id,
+			'command'	: commandObject.command,
+			'params'	: result.params
+		}
+	
+
+		
+		for (var i in result.to) {
+			if(result.to[i]) {
+				this.listener.clientsIndex[result.to[i].sessionId].send(JSON.stringify(response));	
+			}
+		}
+		
+		self.emit("onClientMessage", message, client);
+	},
+	
+	onClientDisconnect: function(socket){
 				
-				send404(res);
-				break;
+		var client = this.clients[socket.sessionId],
+			result = Commands['disconnect'](this, client, {}),
+			response,
+			self = this;
+		
+		
+		response = {
+			'id'		: 'no-id',
+			'command'	: 'disconnect',
+			'params'	: result.params
 		}
-	});
 	
-	var commandFiles = fs.readdirSync(self.options.path + "/commands");
-	
-	commandFiles.forEach(function(file) {
-		var commandName = file.replace(/\.js/,'');
-		var command = require(self.options.path + "/commands/" + commandName)[commandName];
-		
-		
-		Commands[commandName] = command;
-		
-	});
-
-	
-	
-	this.socket.listen(8080, {
-		transports: ['websocket', 'server-events', 'htmlfile', 'xhr-multipart', 'xhr-polling'],
-		log: function(message) {
-			sys.log(message);
-		}
-	});
-	
-	this.listener = io.listen(this.socket, {
-
-		onClientConnect: function(socket){
-			
-			var client = new Client(socket.sessionId);
-			
-			self.clients[socket.sessionId] = client; 
-			
-			self.emit("onClientConnect", client);
-		},
-	
-		onClientDisconnect: function(socket){
-			
-			var client = self.clients[socket.sessionId];
-			
-			var result = Commands['disconnect'](self, client, {});
-			var response = {
-				'id'		: 'no-id',
-				'command'	: 'disconnect',
-				'params'	: result.params
+		for (var i in result.to) {
+			if(result.to[i]) {
+				var current = this.listener.clientsIndex[result.to[i].sessionId];
+				
+				if(current) {
+					current.send(JSON.stringify(response))
+				}	
 			}
+		}			
+		self.emit("onClientDisconnect", client);
+		
+		this.clients[socket.sessionId] = null;
+	},
+	onClientConnect: function(socket){
+				
+		var client = new Client(socket.sessionId);
+		
+		this.clients[socket.sessionId] = client; 
+		
+		this.emit("onClientConnect", client);
+	},
 	
-			for (var i in result.to) {
-				if(result.to[i]) {
-					var current = self.listener.clientsIndex[result.to[i].sessionId];
+	loadCommands: function() {
+		var commandFiles = fs.readdirSync(process.cwd() + "/commands"),
+			self = this, commandName, command;
+		
+		commandFiles.forEach(function(file) {
+			commandName = file.replace(/\.js/,'');
+			command = require(process.cwd() + "/commands/" + commandName)[commandName];
 					
-					if(current) {
-						current.send(JSON.stringify(response))
-					}	
-				}
-			}			
-			self.emit("onClientDisconnect", client);
+			Commands[commandName] = command;
 			
-			self.clients[socket.sessionId] = null;
-		},
-	
-		onClientMessage: function(message, socket){
-		
-			var client = self.clients[socket.sessionId];; 
-			
-			
-			var commandObject = JSON.parse(message);
-			var result = Commands[commandObject.command](self, client, commandObject.params);
-	
-			var response = {
-				'id'		: commandObject.id,
-				'command'	: commandObject.command,
-				'params'	: result.params
-			}
-		
-		
-			
-			for (var i in result.to) {
-				if(result.to[i]) {
-					self.listener.clientsIndex[result.to[i].sessionId].send(JSON.stringify(response));	
-				}
-			}
-			
-			self.emit("onClientMessage", message, client);
-		}
-	});
-	
-	
-}
-Server.prototype.get = function(path) {
-	
-}
-
-sys.inherits(Server, process.EventEmitter); 
+		});
+	}
+});
 
 
-exports.Server = Server;
 
 
 
@@ -179,14 +178,13 @@ var Client = function(sessionId) {
 }
 
 
-var Response = function(to, params) {
+var Response = exports.Response = function(to, params) {
 	return {
 		"to" : to,
 		"params" : params
 	}
 } 
 
-exports.Response = Response;
 
 
 

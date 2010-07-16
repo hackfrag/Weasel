@@ -4,10 +4,9 @@ var weasel = require('../src/lib/node.weasel'),
 
 
 var Example = new weasel.Server({
-	debug : true,
-	path : __dirname,
-	port: 8080
-});
+	debug : true
+}).listen(8080);
+
 
 
 Example.addListener("onClientConnect", function(client) {
