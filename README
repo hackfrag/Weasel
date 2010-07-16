@@ -3,3 +3,7 @@ Weasel - a websocket application framework on node.js
 
 
 INSTALL
+
+
+git submodule update --init --recursive
+
