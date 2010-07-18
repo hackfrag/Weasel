@@ -1,6 +1,7 @@
 var http	= require('http'),
 	url		= require('url'),
 	fs		= require('fs'),
+	path	= require('path'),
 	io		= require('../vendor/socket.io-node/lib/socket.io'),
 	sys		= require('sys'),
 	fileserver = require('../vendor/paperboy/lib/paperboy');
@@ -47,14 +48,28 @@ var Server = exports.Server = Class({
 		this.options = options;
 		this.clients = [];
 		
-		var self = this;
+		var self = this,
+			webroot;
 		
 		process.EventEmitter.call(this);
 	
 		this.socket = http.createServer(function(req, res){
+			var requestPath = url.parse(req.url).pathname;
 			
+			if (/\/server.*$/.test(requestPath)){
+				webroot = path.normalize(__dirname + "/..");
+				req.url = req.url.replace(/server\//, "");
+			} else {
+				webroot = process.cwd()  + "/public";
+			}
+			
+			console.log(requestPath);
+			console.dir(webroot);
 			fileserver
-				.deliver(process.cwd()  + "/public" , req, res)
+				.deliver(webroot , req, res)
+				.after(function(req, res) {
+					
+				})
 				.otherwise(function(err) {
 					res.writeHead(404);
 					res.write('404');

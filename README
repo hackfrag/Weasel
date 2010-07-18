@@ -4,6 +4,7 @@ Weasel - a websocket application framework on node.js
 
 INSTALL
 
-
+git clone git://github.com/hackfrag/Weasel.git
+cd Weasel
 git submodule update --init --recursive
 

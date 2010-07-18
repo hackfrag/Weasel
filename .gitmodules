@@ -7,3 +7,6 @@
 [submodule "src/vendor/paperboy"]
 	path = src/vendor/paperboy
 	url = git://github.com/felixge/node-paperboy.git
+[submodule "src/vendor/socket.io"]
+	path = src/vendor/socket.io
+	url = git://github.com/LearnBoost/Socket.IO.git
