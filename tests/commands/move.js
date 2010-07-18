@@ -1,4 +1,4 @@
-var Weasel = require('../../src/lib/weasel.server');
+var Weasel = require('../../lib/weasel.server');
 
 
 exports.move = function(server, client, params) {

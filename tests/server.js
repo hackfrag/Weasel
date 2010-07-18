@@ -1,4 +1,4 @@
-var weasel = require('../src/lib/weasel.server'),
+var weasel = require('../lib/weasel.server'),
 	sys = require('sys');
 	
 
