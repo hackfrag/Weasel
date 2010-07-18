@@ -1,3 +1,5 @@
+io.setPath('/server/vendor/socket.io/');
+ 
 var Weasel = {
 	
 	debug : true,
