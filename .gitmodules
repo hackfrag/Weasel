@@ -1,12 +1,12 @@
 [submodule "src/vendor/mongoose"]
-	path = src/vendor/mongoose
+	path = lib/vendor/mongoose
 	url = git://github.com/LearnBoost/mongoose.git
 [submodule "src/vendor/socket.io-node"]
-	path = src/vendor/socket.io-node
+	path = lib/vendor/socket.io-node
 	url = git://github.com/LearnBoost/Socket.IO-node.git
 [submodule "src/vendor/paperboy"]
-	path = src/vendor/paperboy
+	path = lib/vendor/paperboy
 	url = git://github.com/felixge/node-paperboy.git
 [submodule "src/vendor/socket.io"]
-	path = src/vendor/socket.io
+	path = lib/vendor/socket.io
 	url = git://github.com/LearnBoost/Socket.IO.git

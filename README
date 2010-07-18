@@ -1,4 +1,4 @@
-Weasel - a websocket application framework on node.js
+Weasel - a command based websocket application framework on node.js
 
 
 
@@ -8,3 +8,8 @@ git clone git://github.com/hackfrag/Weasel.git
 cd Weasel
 git submodule update --init --recursive
 
+
+USAGE
+
+cd tests
+sudo node server.js
