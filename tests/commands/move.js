@@ -3,14 +3,16 @@ var Weasel = require('../../lib/weasel.server');
 
 exports.move = function(server, client, params) {
 	
-	return new Weasel.Response(server.clients, {
+
+	this.response(server.clients, {
 		sessionId: client.sessionId,
 		position: {
 			top:	params.top,
 			left: 	params.left
 		}
-	})
-}
+	});
 
+	
+}
 
 
