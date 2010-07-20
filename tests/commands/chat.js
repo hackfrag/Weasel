@@ -1,4 +1,4 @@
-var Weasel = require('../../lib/weasel.server');
+
 
 
 exports.chat = function(server, client, params) {
