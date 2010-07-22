@@ -14,18 +14,51 @@
 
 
 		<script type="text/javascript" language="client">
-
-			var Example = {
 			
 			
+			var MoveDemo = {
+			
+				createMe: function(client) {
+					var point = MoveDemo.createClient(client);
+					point.addClass('client');
+					$('#movebox').append(point);
+					
+					$('#movebox').click(function(e){
+						
+						var divPos = $('#movebox').position(),
+							newPostion = {top: e.pageY-divPos.top - 25, left: e.pageX-divPos.left - 25};
+						
+						Weasel.command("user/move", newPostion, function(params) {
+							
+							MoveDemo.move({
+								sessionId : client.sessionId,
+								position: newPostion
+							})
+													
+						
+						})
+					});
+					
+					$('#chat-form').submit(function() {
+					Weasel.command("user/chat", {message: $('#chat_message').val()} ,function(params) {
+						MoveDemo.chat({
+							message : $('#chat_message').val(),
+							sessionId : Weasel.Client.sessionId
+						});
+						$('#chat_message').val("")
+					});
+					return false;
+				})
+					
+				},
 				createClient : function(client) {
 					var point = $('<div>');
 			
 					point.attr('id', 'point-' + client.sessionId);
 					point.attr('class', 'box');
 					point.css({
-						'top' 		: client.position.top,
-						'left'		: client.position.left,
+						'top' 		: client.user.position.top,
+						'left'		: client.user.position.left,
 					});
 			
 					point.html('<div class="message"></div>');
@@ -49,67 +82,97 @@
 						left:  params.position.left,
 					}, 500 );
 				
+				},
+				removeClient: function(sessionId) {
+					$('#point-' + sessionId).hide().remove();
+				},
+				login: function() {
+					
+					
+					$('#register-show').click(function(){
+						$('#login-fieldset').hide();
+						$('#register-fieldset').show();
+						return false;
+					})
+					$('#register-hide').click(function(){
+						$('#register-fieldset').hide();
+						$('#login-fieldset').show();
+						return false;
+					})
+					
+					$('#register-action').click(function() {
+						if($('#register-password').val() != $('#register-re-password').val()) {
+							alert('passwords dont match');
+							return false;
+						}
+						Weasel.command('user/register', {username: $('#register-username').val(), password: $('#register-password').val()}, function(params) {
+							$('#register-fieldset').hide();
+							$('#login-fieldset').show();
+							
+						})
+						return false;
+					});
+					
+					$('#login-form').submit(function() {
+						
+						if($('#username').val() == "") {
+							return false;
+						}
+						Weasel.command('user/login', {username: $('#username').val(), password: $('#password').val()}, function(params) {
+							if(params.client) {
+								MoveDemo.createMe(params.client);
+							
+								$('#login').removeClass('show');
+								$('#overlay').hide();
+							} else {
+								alert('Wrong login')
+							}
+							
+						})
+							
+						return false;
+					})
+					
+					$('#login-action').click(function() {
+						$('#login-form').trigger('submit');					
+						return false;
+					})
+					$('#username').trigger('focus')
+					$('#login').addClass('show');
 				}
 				
 			}
 						
 
-			Weasel.subscribe('connect', function(params) {
-				var point = Example.createClient(params.client);
+			Weasel.subscribe('user/login', function(params) {
+				var point = MoveDemo.createClient(params.client);
 				$('#movebox').append(point);
 			})
 			Weasel.subscribe('disconnect', function(params) {
-				$('#point-' + params.client.sessionId).hide();
+				MoveDemo.removeClient(params.client.sessionId);
 			})
-			Weasel.subscribe('user/chat', Example.chat);
+			Weasel.subscribe('user/chat', MoveDemo.chat);
 			
-			Weasel.subscribe('user/move', Example.move);
+			Weasel.subscribe('user/move', MoveDemo.move);
 				
 				
 			
 			Weasel.ready(function() {
 				
 				
-				var point = Example.createClient(Weasel.Client);
-				point.addClass('client');
-				$('#movebox').append(point);
-				
-				$('#movebox').click(function(e){
-					
-					var divPos = $('#movebox').position(),
-						newPostion = {top: e.pageY-divPos.top - 25, left: e.pageX-divPos.left - 25};
-					
-					Weasel.command("user/move", newPostion, function(params) {
-						
-						Example.move({
-							sessionId : Weasel.Client.sessionId,
-							position: newPostion
-						})
-												
-					
-					})
-				})
+				MoveDemo.login();
 				
 				
 				Weasel.command("getAllClients", function(params) {
 				
 					params.clients.forEach(function(client) {
-						point = Example.createClient(client);
+						point = MoveDemo.createClient(client);
 						$('#movebox').append(point);
 					})
 				});
 				
 				
-				$('#chat-form').submit(function() {
-					Weasel.command("user/chat", {message: $('#chat_message').val()} ,function(params) {
-						Example.chat({
-							message : $('#chat_message').val(),
-							sessionId : Weasel.Client.sessionId
-						});
-						$('#chat_message').val("")
-					});
-					return false;
-				})
+				
 				
 				
 
@@ -119,7 +182,39 @@
 		</script>
 	</head>
 	<body>
+		<div id="overlay"></div>
+		<div id="login">
+			<h3>Weasel MoveDemo Login</h3>
+			<p>
+				It's just a small demo for the weasel application framework. No Password is required. Only the current
+				point position is saved.
+			</p>
+			<form action="#" id="login-form">
+				<fieldset id="login-fieldset">
+					<label for="username">Username</label>
+					<input type="text" name="username" id="username" size="40">
+					<label for="password">Password</label>
+					<input type="password" name="password" id="password" size="40">
+				
+					<a href="" class="button green" id="login-action"><span>Login and let's go</span></a>
+					<a href="" class="button red" id="register-show"><span>Dont have a account? Register now!</span></a>
+				</fieldset>
+				<fieldset id="register-fieldset">
+					<label for="username">Username</label>
+					<input type="text" name="register-username" id="register-username" size="40">
+					<label for="password">Password</label>
+					<input type="password" name="register-password" id="register-password" size="40">
+					<label for="password">Re-Password</label>
+					<input type="password" name="register-re-password" id="register-re-password" size="40">
+					<a href="" class="button green" id="register-action"><span>Register</span></a>
+					<a href="" class="button red" id="register-hide"><span>Cancel</span></a>
+				</fieldset>
+
+				
+			</form>
+		</div>
 		<div id="wrapper">
+			
 			<div id="movebox">
 				
 			</div>

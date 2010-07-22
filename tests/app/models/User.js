@@ -1,3 +1,7 @@
 Database.model('User', {
-	properties: ['username', {'position': ['top', 'left']}]
+	
+	properties: ['username', 'password', {'position': ['top', 'left']}, 'sessionId'],
+
+	indexes: ['username', 'sessionId','password']
+	
 });
