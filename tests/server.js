@@ -8,12 +8,16 @@ var Example = new weasel.Server({
 }).listen(8080);
 
 
+
 Example.addListener("onClientConnect", function(client) {
 	client.position = {
 		top: random(50,250),
 		left: random(50,550)
 	}
 })
+
+
+
 
 Example.addListener("onClientDisconnect", function(client) {
 	
