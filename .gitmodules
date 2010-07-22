@@ -1,6 +1,6 @@
 [submodule "src/vendor/mongoose"]
 	path = lib/vendor/mongoose
-	url = git://github.com/LearnBoost/mongoose.git
+	url = git://github.com/hackfrag/mongoose.git 
 [submodule "src/vendor/socket.io-node"]
 	path = lib/vendor/socket.io-node
 	url = git://github.com/LearnBoost/Socket.IO-node.git

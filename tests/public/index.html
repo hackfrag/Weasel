@@ -61,9 +61,9 @@
 			Weasel.subscribe('disconnect', function(params) {
 				$('#point-' + params.client.sessionId).hide();
 			})
-			Weasel.subscribe('chat', Example.chat);
+			Weasel.subscribe('user/chat', Example.chat);
 			
-			Weasel.subscribe('move', Example.move);
+			Weasel.subscribe('user/move', Example.move);
 				
 				
 			
@@ -79,7 +79,7 @@
 					var divPos = $('#movebox').position(),
 						newPostion = {top: e.pageY-divPos.top - 25, left: e.pageX-divPos.left - 25};
 					
-					Weasel.command("move", newPostion, function(params) {
+					Weasel.command("user/move", newPostion, function(params) {
 						
 						Example.move({
 							sessionId : Weasel.Client.sessionId,
@@ -101,7 +101,7 @@
 				
 				
 				$('#chat-form').submit(function() {
-					Weasel.command("chat", {message: $('#chat_message').val()} ,function(params) {
+					Weasel.command("user/chat", {message: $('#chat_message').val()} ,function(params) {
 						Example.chat({
 							message : $('#chat_message').val(),
 							sessionId : Weasel.Client.sessionId
