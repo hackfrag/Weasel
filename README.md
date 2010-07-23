@@ -29,7 +29,7 @@ Another, once cloned
 	git submodule update --init --recursive
 	
 How to run the demo
-----------
+-------------------
 
 	cd tests
 	sudo node server.js
@@ -46,7 +46,6 @@ ToDos
  - add a access log (http and websocket calls)
  - add command line options to weasel (like node server.js start/restart)
  - add 'run as daemon'
- - add mongodb as database layer
  - add configuration files
 
 

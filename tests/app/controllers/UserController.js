@@ -1,16 +1,19 @@
 var sys = require('sys');
 
 Controller('User', {
+	
 	register: function(server, client, params) {
-		var User = server.db.model('User'),self = this;
+		
+		var User = server.db.model('User'), 
+			self = this;
 		
 		user = new User();
 		
-		user.username = params.username;
-		user.password = params.password;
-		user.position.top = (50 + parseInt( Math.random() * ( 250-50+1 ) ));
-		user.position.left = (50 + parseInt( Math.random() * ( 550-50+1 ) ));
-		user.sessionId = client.sessionId;
+		user.username 		= params.username;
+		user.password 		= params.password;
+		user.position.top 	= (50 + parseInt( Math.random() * ( 250-50+1 ) ));
+		user.position.left 	= (50 + parseInt( Math.random() * ( 550-50+1 ) ));
+		user.sessionId 		= client.sessionId;
 		
 		user.save(function() {
 			
@@ -20,10 +23,13 @@ Controller('User', {
 				'client': client
 			})
 		})
+		
 	},
+	
 	login: function(server, client, params) {
 		
-		var User = server.db.model('User'),self = this;
+		var User = server.db.model('User'),
+			self = this;
 		
 		
 		User.find({username: params.username, password: params.password}).one(function(user) {
