@@ -155,7 +155,9 @@
 			
 			Weasel.subscribe('user/move', MoveDemo.move);
 				
-
+			Weasel.subscribe('user/ping', function(params) {
+				console.log('PONG')
+			});
 				
 			
 			Weasel.ready(function() {

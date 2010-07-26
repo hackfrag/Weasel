@@ -23,8 +23,10 @@ var Example = new weasel.Server().listen(8080);
 
 
 
+
 Example.addListener("onClientConnect", function(client) {
-	
+
+
 })
 
 Example.addListener("onClientDisconnect", function(client) {

@@ -19,7 +19,7 @@ Controller('User', {
 			
 			client.user = user.toObject();
 			
-			self.response(server.clients,{
+			self.response([client],{
 				'client': client
 			})
 		})
@@ -48,7 +48,7 @@ Controller('User', {
 
 			} else {
 				
-				self.response(server.clients,{
+				self.response([client],{
 					'client': null
 				})
 			}		
@@ -57,7 +57,12 @@ Controller('User', {
 		})
 
 	},
-	
+	ping: function(server, client, params) {
+		
+			this.response([client], {
+				ping: true
+			})
+	},
 	chat: function(server, client, params) {
 		
 		this.response(server.clients, {
