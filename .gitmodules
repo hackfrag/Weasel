@@ -7,6 +7,3 @@
 [submodule "src/vendor/socket.io"]
 	path = lib/vendor/socket.io
 	url = git://github.com/LearnBoost/Socket.IO.git
-[submodule "lib/vendor/mongoose"]
-	path = lib/vendor/mongoose
-	url = git://github.com/hackfrag/mongoose.git
