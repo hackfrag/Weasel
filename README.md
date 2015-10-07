@@ -84,7 +84,7 @@ How to use weasel
 		<body>
 
 			Weasel.subscribe('user/chat', function(params){
-				console.log('Called by another conected client:' +params.message);
+				console.log('Called by another connected client:' +params.message);
 			})
 			Weasel.ready(function() {
 				Weasel.command('user/chat', {message: 'test'}, function(params) {
